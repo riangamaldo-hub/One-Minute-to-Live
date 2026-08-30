@@ -36,6 +36,10 @@ const SHIRT_COLORS = ['#FF4444', '#4444FF', '#44FF44', '#FF8C00', '#9C27B0'];
 const PANTS_COLORS = ['#1A237E', '#212121', '#4CAF50', '#795548', '#607D8B'];
 const SHOE_COLORS = ['#212121', '#FFFFFF', '#FF4444', '#8B4513', '#4444FF'];
 
+const SHIRT_STYLES = ['Crew Neck', 'V-Neck', 'Polo', 'Hoodie', 'Tank Top'];
+const PANTS_STYLES = ['Jeans', 'Skinny', 'Cargo', 'Shorts', 'Joggers'];
+const SHOE_STYLES = ['Sneakers', 'Boots', 'High-Tops', 'Dress', 'Sandals'];
+
 const MALE_HAIR_STYLES = [
   { label: 'Buzz Cut', emoji: '✂️' },
   { label: 'Side Part', emoji: '💈' },
@@ -372,13 +376,15 @@ export default function AvatarBuilderScreen() {
 
       case 6: {
         const outfitOptions = [
-          { key: 'shirtStyle' as keyof AvatarData, colors: SHIRT_COLORS },
-          { key: 'pantsStyle' as keyof AvatarData, colors: PANTS_COLORS },
-          { key: 'shoeStyle' as keyof AvatarData, colors: SHOE_COLORS },
+          { key: 'shirtStyle' as keyof AvatarData, colors: SHIRT_COLORS, styles: SHIRT_STYLES },
+          { key: 'pantsStyle' as keyof AvatarData, colors: PANTS_COLORS, styles: PANTS_STYLES },
+          { key: 'shoeStyle' as keyof AvatarData, colors: SHOE_COLORS, styles: SHOE_STYLES },
         ];
         const current = outfitOptions[outfitTab];
+        const currentStyleIndex = avatar[current.key] as number;
         return (
           <View>
+            {/* Tab selector */}
             <View style={{ flexDirection: 'row', marginHorizontal: 20, marginBottom: 16, backgroundColor: COLORS.surface, borderRadius: 12, padding: 4 }}>
               {OUTFIT_TABS.map((tab, i) => (
                 <Pressable
@@ -401,12 +407,32 @@ export default function AvatarBuilderScreen() {
                 </Pressable>
               ))}
             </View>
+
+            {/* Style selector row */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, flexDirection: 'row', marginBottom: 14 }}>
+              {current.styles.map((label, i) => (
+                <OptionCard
+                  key={i}
+                  label={label}
+                  selected={currentStyleIndex === i}
+                  onPress={() => {
+                    console.log('[AvatarBuilder] Outfit style selected:', current.key, i, label);
+                    set(current.key, i as AvatarData[typeof current.key]);
+                  }}
+                />
+              ))}
+            </ScrollView>
+
+            {/* Color swatches */}
+            <Text style={{ color: COLORS.textSecondary, fontSize: 11, fontWeight: '600', letterSpacing: 1, marginLeft: 20, marginBottom: 10 }}>
+              COLOR
+            </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 12, flexDirection: 'row' }}>
               {current.colors.map((color, i) => (
                 <ColorSwatch
                   key={color}
                   color={color}
-                  selected={(avatar[current.key] as number) === i}
+                  selected={currentStyleIndex === i}
                   onPress={() => {
                     console.log('[AvatarBuilder] Outfit color selected:', current.key, i, color);
                     set(current.key, i as AvatarData[typeof current.key]);
@@ -422,7 +448,7 @@ export default function AvatarBuilderScreen() {
       case 7:
         return (
           <View style={{ alignItems: 'center', paddingHorizontal: 20 }}>
-            <ChibiAvatar avatarData={avatar} size={160} />
+            <ChibiAvatar avatarData={avatar} size={180} />
             <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginTop: 16, textAlign: 'center' }}>
               Looking good, Survivor!
             </Text>
@@ -454,7 +480,7 @@ export default function AvatarBuilderScreen() {
 
       {/* Avatar preview */}
       <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-        <ChibiAvatar avatarData={avatar} size={120} />
+        <ChibiAvatar avatarData={avatar} size={180} />
       </View>
 
       {/* Step content */}
