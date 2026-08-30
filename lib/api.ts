@@ -43,8 +43,11 @@ export async function submitPlay(params: SubmitPlayParams): Promise<SubmitPlayRe
     throw new Error(`Failed to submit play: ${response.status}`);
   }
   const data = await response.json();
-  console.log('[API] submitPlay success', data.result);
-  return data;
+  console.log('[API] submitPlay success', { result: data.result, rewardDrop: data.reward_drop });
+  return {
+    result: data.result,
+    reward_drop: data.reward_drop ?? [],
+  };
 }
 
 export async function getLeaderboard(userId?: string): Promise<LeaderboardResponse> {
@@ -60,7 +63,14 @@ export async function getLeaderboard(userId?: string): Promise<LeaderboardRespon
   }
   const data = await response.json();
   console.log('[API] getLeaderboard success', { totalPlayers: data.total_players, userRank: data.user_rank });
-  return data;
+  return {
+    leaderboard: (data.leaderboard ?? []).map((entry: LeaderboardResponse['leaderboard'][number] & { user_id?: string }) => ({
+      ...entry,
+      user_id: entry.user_id,
+    })),
+    user_rank: data.user_rank,
+    total_players: data.total_players,
+  };
 }
 
 export async function upsertUser(user: UserUpsert): Promise<User> {

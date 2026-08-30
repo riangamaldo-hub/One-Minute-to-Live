@@ -25,6 +25,14 @@ export interface PlayResult {
   total_players: number;
 }
 
+export interface RewardDropItem {
+  id: string;
+  name: string;
+  rarity: string;
+  body_part: string;
+  preview_emoji: string;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   display_name: string;
@@ -33,6 +41,7 @@ export interface LeaderboardEntry {
   iq_delta: number;
   time_taken_seconds: number;
   chosen_items: string[];
+  user_id?: string;
 }
 
 export interface TodayScenarioResponse {
@@ -62,6 +71,7 @@ export interface SubmitPlayParams {
 
 export interface SubmitPlayResponse {
   result: PlayResult;
+  reward_drop: RewardDropItem[];
 }
 
 export interface LeaderboardResponse {

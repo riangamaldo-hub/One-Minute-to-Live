@@ -38,12 +38,14 @@ export default function OutcomeScreen() {
     scenario_title: string;
     day_number: string;
     chosen_items: string;
+    reward_drop?: string;
   }>();
 
   const result: PlayResult = params.result ? JSON.parse(params.result) : null;
   const scenarioTitle = params.scenario_title ?? 'Unknown Scenario';
   const dayNumber = params.day_number ?? '1';
   const chosenItems: string[] = params.chosen_items ? JSON.parse(params.chosen_items) : [];
+  const rewardDrop = params.reward_drop ? JSON.parse(params.reward_drop) : [];
 
   // Animations
   const emojiScale = useRef(new Animated.Value(0)).current;
@@ -211,12 +213,52 @@ export default function OutcomeScreen() {
         </View>
 
         {/* Rank */}
-        <View style={{ backgroundColor: COLORS.surfaceSecondary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <View style={{ backgroundColor: COLORS.surfaceSecondary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>Global rank</Text>
           <Text style={{ color: COLORS.text, fontFamily: 'SpaceMono', fontSize: 15, fontWeight: '700' }}>
             {rankDisplay}
           </Text>
         </View>
+
+        {/* Reward drop banner */}
+        {rewardDrop.length > 0 && (
+          <Pressable
+            onPress={() => {
+              console.log('[OutcomeScreen] Reward drop banner pressed, items:', rewardDrop.length);
+              router.push({
+                pathname: '/reward-drop-modal',
+                params: {
+                  items: JSON.stringify(rewardDrop),
+                  percentile: String(result.percentile),
+                },
+              });
+            }}
+            style={({ pressed }) => ({
+              backgroundColor: 'rgba(255,215,0,0.1)',
+              borderRadius: 14,
+              paddingVertical: 14,
+              paddingHorizontal: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderWidth: 1.5,
+              borderColor: 'rgba(255,215,0,0.4)',
+              marginBottom: 16,
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Text style={{ fontSize: 24 }}>🎁</Text>
+              <View>
+                <Text style={{ color: '#FFD700', fontSize: 14, fontWeight: '800' }}>Reward Drop!</Text>
+                <Text style={{ color: '#9090A8', fontSize: 12, marginTop: 1 }}>
+                  Tap to claim {rewardDrop.length} item{rewardDrop.length !== 1 ? 's' : ''}
+                </Text>
+              </View>
+            </View>
+            <Text style={{ color: '#FFD700', fontSize: 18 }}>→</Text>
+          </Pressable>
+        )}
 
         {/* Items used */}
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 32, justifyContent: 'center' }}>

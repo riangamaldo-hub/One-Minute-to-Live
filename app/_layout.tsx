@@ -38,6 +38,9 @@ const EXCLUDED_PATHS = [
   '/onboarding',
   '/paywall',
   '/marketplace',
+  '/avatar-profile',
+  '/avatar-customize',
+  '/reward-drop-modal',
 ];
 
 function SubscriptionRedirect() {
@@ -130,6 +133,12 @@ export default function RootLayout() {
                       sheetAllowedDetents: [0.5, 0.75],
                       contentStyle: { backgroundColor: "transparent" },
                     }}
+                  />
+                  <Stack.Screen name="avatar-profile" options={{ headerShown: false }} />
+                  <Stack.Screen name="avatar-customize" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="reward-drop-modal"
+                    options={{ headerShown: false, presentation: "modal" }}
                   />
                 </Stack>
                 <SystemBars style="light" />

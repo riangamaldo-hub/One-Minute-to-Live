@@ -319,7 +319,7 @@ export default function PlayScreen() {
       });
       const today = new Date().toISOString().split('T')[0];
       await setLastPlayedDate(today);
-      console.log('[PlayScreen] Submit success, navigating to outcome');
+      console.log('[PlayScreen] Submit success, navigating to outcome, rewardDrop:', result.reward_drop?.length ?? 0);
       router.push({
         pathname: '/outcome',
         params: {
@@ -327,6 +327,7 @@ export default function PlayScreen() {
           scenario_title: scenarioData.scenario.title,
           day_number: String(scenarioData.scenario.day_number),
           chosen_items: JSON.stringify(items),
+          reward_drop: encodeURIComponent(JSON.stringify(result.reward_drop ?? [])),
         },
       });
     } catch (err) {

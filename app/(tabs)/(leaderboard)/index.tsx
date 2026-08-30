@@ -57,7 +57,7 @@ function SkeletonRow() {
   );
 }
 
-function AnimatedRow({ entry, index, isCurrentUser }: { entry: LeaderboardEntry; index: number; isCurrentUser: boolean }) {
+function AnimatedRow({ entry, index, isCurrentUser, onPress }: { entry: LeaderboardEntry; index: number; isCurrentUser: boolean; onPress: () => void }) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(12)).current;
 
@@ -79,17 +79,22 @@ function AnimatedRow({ entry, index, isCurrentUser }: { entry: LeaderboardEntry;
 
   return (
     <Animated.View style={{ opacity, transform: [{ translateY }] }}>
-      <View
-        style={{
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => ({
           flexDirection: 'row',
           alignItems: 'center',
           paddingVertical: 14,
           paddingHorizontal: 20,
-          backgroundColor: isCurrentUser ? COLORS.primaryMuted : 'transparent',
+          backgroundColor: pressed
+            ? 'rgba(255,255,255,0.04)'
+            : isCurrentUser
+            ? COLORS.primaryMuted
+            : 'transparent',
           borderLeftWidth: isCurrentUser ? 3 : 0,
           borderLeftColor: COLORS.primary,
           gap: 12,
-        }}
+        })}
       >
         {/* Rank */}
         <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: rankBg, alignItems: 'center', justifyContent: 'center' }}>
@@ -131,7 +136,7 @@ function AnimatedRow({ entry, index, isCurrentUser }: { entry: LeaderboardEntry;
           </Text>
           <Text style={{ color: COLORS.textTertiary, fontSize: 11 }}>{timeDisplay}</Text>
         </View>
-      </View>
+      </Pressable>
       <View style={{ height: 1, backgroundColor: COLORS.divider, marginHorizontal: 20 }} />
     </Animated.View>
   );
@@ -243,13 +248,33 @@ export default function LeaderboardScreen() {
         <FlatList
           data={entries}
           keyExtractor={(item) => String(item.rank)}
-          renderItem={({ item, index }) => (
-            <AnimatedRow
-              entry={item}
-              index={index}
-              isCurrentUser={!!(userId && item.rank === userRank)}
-            />
-          )}
+          renderItem={({ item, index }) => {
+            const isCurrentUser = !!(userId && item.rank === userRank);
+            return (
+              <AnimatedRow
+                entry={item}
+                index={index}
+                isCurrentUser={isCurrentUser}
+                onPress={() => {
+                  if (isCurrentUser) {
+                    console.log('[LeaderboardScreen] Own row pressed, navigating to avatar-profile');
+                    router.push('/avatar-profile');
+                  } else {
+                    console.log('[LeaderboardScreen] Other player row pressed:', item.display_name, 'userId:', item.user_id);
+                    router.push({
+                      pathname: '/avatar-profile',
+                      params: {
+                        user_id: item.user_id ?? '',
+                        display_name: item.display_name,
+                        survival_iq: String(item.iq_delta),
+                        view_only: 'true',
+                      },
+                    });
+                  }
+                }}
+              />
+            );
+          }}
           contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
