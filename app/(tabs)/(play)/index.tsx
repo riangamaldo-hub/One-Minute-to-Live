@@ -171,7 +171,7 @@ function ItemCard({
 export default function PlayScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { userId, setLastPlayedDate, onboardingComplete, isLoading: gameLoading } = useGame();
+  const { userId, displayName, avatarEmoji, setLastPlayedDate, onboardingComplete, isLoading: gameLoading } = useGame();
   const { isSubscribed } = useSubscription();
 
   // Redirect to onboarding if not complete
@@ -314,6 +314,8 @@ export default function PlayScreen() {
         chosen_items: items,
         time_taken_seconds: timeTaken,
         user_id: userId ?? undefined,
+        display_name: displayName ?? 'Survivor',
+        avatar_emoji: avatarEmoji,
       });
       const today = new Date().toISOString().split('T')[0];
       await setLastPlayedDate(today);

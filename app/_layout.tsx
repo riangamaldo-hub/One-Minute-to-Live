@@ -26,9 +26,18 @@ const DevErrorBoundary = __DEV__
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  initialRouteName: "splash",
 };
 
+const EXCLUDED_PATHS = [
+  '/splash',
+  '/avatar-builder',
+  '/rules',
+  '/menu',
+  '/options',
+  '/onboarding',
+  '/paywall',
+];
 
 function SubscriptionRedirect() {
   const { isSubscribed, loading } = useSubscription();
@@ -38,11 +47,8 @@ function SubscriptionRedirect() {
 
   useEffect(() => {
     if (loading || gameLoading) return;
-    const onOnboarding = pathname.startsWith("/onboarding");
-    if (onOnboarding) return;
+    if (EXCLUDED_PATHS.some(p => pathname.startsWith(p))) return;
     if (!onboardingComplete) return;
-    const onPaywall = pathname === "/paywall";
-    if (onPaywall) return;
     if (!isSubscribed) {
       router.replace("/paywall");
     }
@@ -90,41 +96,46 @@ export default function RootLayout() {
 
   return (
     <SubscriptionProvider>
-  <DevErrorBoundary>
-      <StatusBar style="light" animated />
-      <ThemeProvider value={colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme}>
-        <SafeAreaProvider>
-          <GameProvider>
-            <SubscriptionRedirect />
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A0A0F" } }}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal" }} />
-                <Stack.Screen
-                  name="outcome"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                    contentStyle: { backgroundColor: "#0A0A0F" },
-                  }}
-                />
-                <Stack.Screen
-                  name="auth-prompt"
-                  options={{
-                    headerShown: false,
-                    presentation: "formSheet",
-                    sheetGrabberVisible: true,
-                    sheetAllowedDetents: [0.5, 0.75],
-                    contentStyle: { backgroundColor: "transparent" },
-                  }}
-                />
-              </Stack>
-              <SystemBars style="light" />
-            </GestureHandlerRootView>
-          </GameProvider>
-        </SafeAreaProvider>
-      </ThemeProvider>
-    </DevErrorBoundary>
+      <DevErrorBoundary>
+        <StatusBar style="light" animated />
+        <ThemeProvider value={colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme}>
+          <SafeAreaProvider>
+            <GameProvider>
+              <SubscriptionRedirect />
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A0A0F" } }}>
+                  <Stack.Screen name="splash" options={{ headerShown: false }} />
+                  <Stack.Screen name="avatar-builder" options={{ headerShown: false }} />
+                  <Stack.Screen name="rules" options={{ headerShown: false }} />
+                  <Stack.Screen name="menu" options={{ headerShown: false }} />
+                  <Stack.Screen name="options" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal" }} />
+                  <Stack.Screen
+                    name="outcome"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                      contentStyle: { backgroundColor: "#0A0A0F" },
+                    }}
+                  />
+                  <Stack.Screen
+                    name="auth-prompt"
+                    options={{
+                      headerShown: false,
+                      presentation: "formSheet",
+                      sheetGrabberVisible: true,
+                      sheetAllowedDetents: [0.5, 0.75],
+                      contentStyle: { backgroundColor: "transparent" },
+                    }}
+                  />
+                </Stack>
+                <SystemBars style="light" />
+              </GestureHandlerRootView>
+            </GameProvider>
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </DevErrorBoundary>
     </SubscriptionProvider>
   );
 }

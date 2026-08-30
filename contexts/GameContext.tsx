@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { upsertUser } from '@/lib/api';
+import type { AvatarData } from '@/types/game';
 
 const STORAGE_KEYS = {
   USER_ID: '@sixty_seconds/user_id',
@@ -9,6 +10,8 @@ const STORAGE_KEYS = {
   ONBOARDING_COMPLETE: '@sixty_seconds/onboarding_complete',
   LAST_PLAYED_DATE: '@sixty_seconds/last_played_date',
   IS_GUEST: '@sixty_seconds/is_guest',
+  AVATAR_BUILDER_COMPLETE: '@sixty_seconds/avatar_builder_complete',
+  AVATAR_DATA: '@sixty_seconds/avatar_data',
 };
 
 function generateGuestId(): string {
@@ -25,6 +28,8 @@ interface GameState {
   onboardingComplete: boolean;
   lastPlayedDate: string | null;
   isLoading: boolean;
+  avatarBuilderComplete: boolean;
+  avatarData: AvatarData | null;
 }
 
 interface GameContextValue extends GameState {
@@ -32,6 +37,7 @@ interface GameContextValue extends GameState {
   setLastPlayedDate: (date: string) => Promise<void>;
   updateUser: (displayName: string, avatarEmoji: string) => Promise<void>;
   refreshUserId: () => Promise<string>;
+  setAvatarBuilderComplete: (avatarData: AvatarData) => Promise<void>;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -47,6 +53,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     onboardingComplete: false,
     lastPlayedDate: null,
     isLoading: true,
+    avatarBuilderComplete: false,
+    avatarData: null,
   });
 
   useEffect(() => {
@@ -55,18 +63,28 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const loadStoredState = async () => {
     try {
-      const [userId, displayName, avatarEmoji, onboardingComplete, lastPlayedDate, isGuest] =
-        await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.USER_ID),
-          AsyncStorage.getItem(STORAGE_KEYS.DISPLAY_NAME),
-          AsyncStorage.getItem(STORAGE_KEYS.AVATAR_EMOJI),
-          AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE),
-          AsyncStorage.getItem(STORAGE_KEYS.LAST_PLAYED_DATE),
-          AsyncStorage.getItem(STORAGE_KEYS.IS_GUEST),
-        ]);
+      const [
+        userId,
+        displayName,
+        avatarEmoji,
+        onboardingComplete,
+        lastPlayedDate,
+        isGuest,
+        avatarBuilderComplete,
+        avatarDataRaw,
+      ] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEYS.USER_ID),
+        AsyncStorage.getItem(STORAGE_KEYS.DISPLAY_NAME),
+        AsyncStorage.getItem(STORAGE_KEYS.AVATAR_EMOJI),
+        AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE),
+        AsyncStorage.getItem(STORAGE_KEYS.LAST_PLAYED_DATE),
+        AsyncStorage.getItem(STORAGE_KEYS.IS_GUEST),
+        AsyncStorage.getItem(STORAGE_KEYS.AVATAR_BUILDER_COMPLETE),
+        AsyncStorage.getItem(STORAGE_KEYS.AVATAR_DATA),
+      ]);
 
       let resolvedUserId = userId;
-      let resolvedIsGuest = isGuest !== 'false';
+      const resolvedIsGuest = isGuest !== 'false';
 
       if (!resolvedUserId) {
         resolvedUserId = generateGuestId();
@@ -75,6 +93,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         console.log('[GameContext] Generated new guest ID:', resolvedUserId);
       } else {
         console.log('[GameContext] Loaded stored user ID:', resolvedUserId, 'isGuest:', resolvedIsGuest);
+      }
+
+      let parsedAvatarData: AvatarData | null = null;
+      if (avatarDataRaw) {
+        try {
+          parsedAvatarData = JSON.parse(avatarDataRaw);
+        } catch {
+          console.warn('[GameContext] Failed to parse avatar data');
+        }
       }
 
       setState({
@@ -87,6 +114,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         onboardingComplete: onboardingComplete === 'true',
         lastPlayedDate: lastPlayedDate,
         isLoading: false,
+        avatarBuilderComplete: avatarBuilderComplete === 'true',
+        avatarData: parsedAvatarData,
       });
     } catch (err) {
       console.error('[GameContext] Failed to load stored state:', err);
@@ -130,8 +159,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return newId;
   }, []);
 
+  const setAvatarBuilderComplete = useCallback(async (avatarData: AvatarData) => {
+    console.log('[GameContext] setAvatarBuilderComplete', avatarData);
+    await Promise.all([
+      AsyncStorage.setItem(STORAGE_KEYS.AVATAR_BUILDER_COMPLETE, 'true'),
+      AsyncStorage.setItem(STORAGE_KEYS.AVATAR_DATA, JSON.stringify(avatarData)),
+    ]);
+    setState(prev => ({ ...prev, avatarBuilderComplete: true, avatarData }));
+  }, []);
+
   return (
-    <GameContext.Provider value={{ ...state, setOnboardingComplete, setLastPlayedDate, updateUser, refreshUserId }}>
+    <GameContext.Provider value={{
+      ...state,
+      setOnboardingComplete,
+      setLastPlayedDate,
+      updateUser,
+      refreshUserId,
+      setAvatarBuilderComplete,
+    }}>
       {children}
     </GameContext.Provider>
   );

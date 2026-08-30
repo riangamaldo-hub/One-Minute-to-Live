@@ -55,6 +55,9 @@ export interface SubmitPlayParams {
   chosen_items: string[];
   time_taken_seconds: number;
   user_id?: string;
+  display_name?: string;
+  avatar_emoji?: string;
+  avatar_data?: AvatarData;
 }
 
 export interface SubmitPlayResponse {
@@ -82,4 +85,20 @@ export interface User {
   last_played_date: string | null;
   total_plays?: number;
   best_survival_days?: number;
+}
+
+export interface AvatarData {
+  gender: 'male' | 'female';
+  skinTone: string;
+  hairStyle: number;
+  hairColor: string;
+  eyeStyle: number;
+  noseStyle: number;
+  mouthStyle: number;
+  eyebrowStyle: number;
+  eyelashStyle: number;
+  facialHairStyle: number;
+  shirtStyle: number;
+  pantsStyle: number;
+  shoeStyle: number;
 }

@@ -24,7 +24,7 @@ import { useSubscription } from "@/contexts/SubscriptionContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const LOGO = require("@/assets/images/9fee1375-8957-4c34-ab24-126f70332eb4.jpeg");
+const LOGO = require("@/assets/images/9d133403-fd40-4eab-b324-e93d60f637fa.jpeg");
 
 const COLORS = {
   bg: "#0A0A0F",
@@ -63,6 +63,33 @@ const FEATURES = [
   },
 ];
 
+const TIERS = [
+  {
+    id: 'basic',
+    name: 'BASIC',
+    price: '$4.99/month',
+    features: ['5 challenges/day', 'Basic AI judging', 'Basic scores', 'Limited multiplayer'],
+    popular: false,
+    accent: COLORS.textSecondary,
+  },
+  {
+    id: 'pro',
+    name: 'PRO',
+    price: '$7.99/month',
+    features: ['15 challenges/day', 'Better AI judging', 'Better scores', '2x multiplayer'],
+    popular: true,
+    accent: COLORS.lime,
+  },
+  {
+    id: 'premium',
+    name: 'PREMIUM',
+    price: '$9.99/month',
+    features: ['25 challenges/day', 'Best AI judging', 'Advanced AI personalities', 'Full multiplayer'],
+    popular: false,
+    accent: COLORS.red,
+  },
+];
+
 export default function PaywallScreen() {
   const router = useRouter();
   const {
@@ -79,6 +106,7 @@ export default function PaywallScreen() {
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(
     packages[0] || null
   );
+  const [selectedTierId, setSelectedTierId] = useState<string>('pro');
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [webMockState, setWebMockState] = useState<"idle" | "processing">("idle");
@@ -232,9 +260,56 @@ export default function PaywallScreen() {
             ))}
           </View>
 
-          {/* Package selection */}
+          {/* Tier selection */}
+          <View style={styles.packagesContainer}>
+            {TIERS.map((tier) => {
+              const isSelected = selectedTierId === tier.id;
+              return (
+                <TouchableOpacity
+                  key={tier.id}
+                  style={[
+                    styles.packageCard,
+                    isSelected && { borderColor: tier.accent, backgroundColor: tier.id === 'pro' ? COLORS.limeMuted : tier.id === 'premium' ? COLORS.redMuted : 'rgba(144,144,168,0.08)' },
+                  ]}
+                  onPress={() => {
+                    console.log("[Paywall] Tier selected:", tier.id);
+                    setSelectedTierId(tier.id);
+                    if (packages.length > 0) setSelectedPackage(packages[0]);
+                  }}
+                >
+                  {isSelected && <View style={[styles.packageTopBar, { backgroundColor: tier.accent }]} />}
+                  <View style={styles.packageHeader}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={[styles.packageTitle, { color: isSelected ? tier.accent : COLORS.text }]}>{tier.name}</Text>
+                      {tier.popular && (
+                        <View style={{ backgroundColor: COLORS.limeMuted, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2, borderWidth: 1, borderColor: COLORS.lime }}>
+                          <Text style={{ color: COLORS.lime, fontSize: 9, fontWeight: '800', letterSpacing: 0.5 }}>MOST POPULAR</Text>
+                        </View>
+                      )}
+                    </View>
+                    {isSelected && (
+                      <View style={[styles.checkmarkCircle, { backgroundColor: tier.accent }]}>
+                        <Text style={styles.checkmark}>✓</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.packagePrice, { color: tier.accent }]}>{tier.price}</Text>
+                  <View style={{ marginTop: 8, gap: 4 }}>
+                    {tier.features.map((f, i) => (
+                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ color: tier.accent, fontSize: 11 }}>✓</Text>
+                        <Text style={styles.packageDescription}>{f}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* RevenueCat packages (if available) */}
           {packages.length > 0 && (
-            <View style={styles.packagesContainer}>
+            <View style={[styles.packagesContainer, { marginTop: 8 }]}>
               {packages.map((pkg) => {
                 const isSelected = selectedPackage?.identifier === pkg.identifier;
                 const pkgPrice = pkg.product.priceString ?? "";

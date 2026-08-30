@@ -78,11 +78,12 @@ export default function OutcomeScreen() {
 
   const handleShare = async () => {
     console.log('[OutcomeScreen] Share pressed');
-    const shareText = `Day ${dayNumber}: I survived ${result.survival_days} days. ${result.reaction_emoji}\nBeat ${result.percentile}% of players today.\n\nCan you do better? #SixtySecondsLeft`;
     try {
-      await Share.share({ message: shareText });
-    } catch (err) {
-      console.error('[OutcomeScreen] Share failed:', err);
+      await Share.share({
+        message: `Day ${dayNumber}: I survived ${result.survival_days} days! ${result.reaction_emoji}\nI beat ${result.percentile}% of players today.\n\nCan you do better? Play One Minute to Live 👇\n#OneMinuteToLive #SixtySecondsLeft`,
+      });
+    } catch (e) {
+      console.error('Share failed:', e);
     }
   };
 
