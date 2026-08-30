@@ -37,6 +37,7 @@ const EXCLUDED_PATHS = [
   '/options',
   '/onboarding',
   '/paywall',
+  '/marketplace',
 ];
 
 function SubscriptionRedirect() {
@@ -109,6 +110,7 @@ export default function RootLayout() {
                   <Stack.Screen name="rules" options={{ headerShown: false }} />
                   <Stack.Screen name="menu" options={{ headerShown: false }} />
                   <Stack.Screen name="options" options={{ headerShown: false }} />
+                  <Stack.Screen name="marketplace" options={{ headerShown: false }} />
                   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                   <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal" }} />
                   <Stack.Screen

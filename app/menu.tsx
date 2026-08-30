@@ -47,11 +47,10 @@ const MENU_ITEMS = [
     id: 'marketplace',
     emoji: '🛒',
     title: 'MARKETPLACE',
-    subtitle: 'Scenario packs · Cosmetics · Retries',
+    subtitle: 'Packs · Cosmetics · Retries',
     accent: COLORS.primary,
     accentMuted: COLORS.primaryMuted,
     prominent: false,
-    comingSoon: true,
   },
   {
     id: 'options',
@@ -127,11 +126,7 @@ function MenuCard({
             }}>
               {item.title}
             </Text>
-            {item.comingSoon ? (
-              <View style={{ backgroundColor: COLORS.primaryMuted, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                <Text style={{ color: COLORS.primary, fontSize: 9, fontWeight: '800', letterSpacing: 0.5 }}>SOON</Text>
-              </View>
-            ) : null}
+
           </View>
           <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>{item.subtitle}</Text>
         </View>
@@ -164,7 +159,7 @@ export default function MenuScreen() {
         router.push('/(tabs)/(leaderboard)');
         break;
       case 'marketplace':
-        Alert.alert('Coming Soon', 'The Marketplace is under construction. Check back soon!');
+        router.push('/marketplace');
         break;
       case 'options':
         router.push('/options');
