@@ -31,7 +31,7 @@ export default function TabLayout() {
         <Stack.Screen name="(play)" />
         <Stack.Screen name="(leaderboard)" />
       </Stack>
-      <FloatingTabBar tabs={TABS} containerWidth={220} bottomMargin={insets.bottom > 0 ? 8 : 20} />
+      <FloatingTabBar tabs={TABS} containerWidth={280} bottomMargin={insets.bottom > 0 ? 8 : 20} />
     </View>
   );
 }

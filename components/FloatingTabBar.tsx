@@ -22,6 +22,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Href } from 'expo-router';
 
 const { width: screenWidth } = Dimensions.get('window');
+const HOME_BUTTON_SIZE = 48;
 
 export interface TabBarItem {
   name: string;
@@ -94,23 +95,32 @@ export default function FloatingTabBar({
     }
   }, [activeTabIndex, animatedValue]);
 
-  const handleTabPress = (route: Href) => {
+  const handleTabPress = (route: Href, label: string) => {
+    console.log(`[FloatingTabBar] Tab pressed: ${label}, route: ${String(route)}`);
     router.push(route);
+  };
+
+  const handleHomePress = () => {
+    console.log('[FloatingTabBar] Home button pressed, navigating to /menu');
+    router.push('/menu');
   };
 
   // Remove unnecessary tabBarStyle animation to prevent flickering
 
-  const tabWidthPercent = ((100 / tabs.length) - 1).toFixed(2);
+  // Indicator only covers the 2 real tabs, not the home button
+  const TAB_COUNT = 2;
+  const tabWidthPercent = ((100 / TAB_COUNT) - 1).toFixed(2);
 
   const indicatorStyle = useAnimatedStyle(() => {
-    const tabWidth = (containerWidth - 8) / tabs.length; // Account for container padding (4px on each side)
+    // The pill width minus padding, divided by 2 real tabs
+    const tabWidth = (containerWidth - 8 - HOME_BUTTON_SIZE) / TAB_COUNT;
     return {
       transform: [
         {
           translateX: interpolate(
             animatedValue.value,
-            [0, tabs.length - 1],
-            [0, tabWidth * (tabs.length - 1)]
+            [0, TAB_COUNT - 1],
+            [0, tabWidth * (TAB_COUNT - 1)]
           ),
         },
       ],
@@ -148,9 +158,10 @@ export default function FloatingTabBar({
     indicator: {
       ...styles.indicator,
       backgroundColor: theme.dark
-        ? 'rgba(255, 255, 255, 0.08)' // Subtle white overlay in dark mode
-        : 'rgba(0, 0, 0, 0.04)', // Subtle black overlay in light mode
-      width: `${tabWidthPercent}%` as `${number}%`, // Dynamic width based on number of tabs
+        ? 'rgba(255, 255, 255, 0.08)'
+        : 'rgba(0, 0, 0, 0.04)',
+      // Width is a fraction of the pill minus the home button space
+      width: (containerWidth - 8 - HOME_BUTTON_SIZE) / TAB_COUNT,
     },
   };
 
@@ -170,18 +181,18 @@ export default function FloatingTabBar({
           <View style={dynamicStyles.background} />
           <Animated.View style={[dynamicStyles.indicator, indicatorStyle]} />
           <View style={styles.tabsContainer}>
-            {tabs.map((tab, index) => {
-              const isActive = activeTabIndex === index;
-
+            {/* Tab 0: Play */}
+            {tabs[0] && (() => {
+              const tab = tabs[0];
+              const isActive = activeTabIndex === 0;
               return (
-                <React.Fragment key={index}>
                 <TouchableOpacity
-                  key={index} // Use index as key
+                  key={tab.name}
                   style={styles.tab}
-                  onPress={() => handleTabPress(tab.route)}
+                  onPress={() => handleTabPress(tab.route, tab.label)}
                   activeOpacity={0.7}
                 >
-                  <View key={index} style={styles.tabContent}>
+                  <View style={styles.tabContent}>
                     <IconSymbol
                       android_material_icon_name={tab.icon}
                       ios_icon_name={tab.icon}
@@ -199,9 +210,49 @@ export default function FloatingTabBar({
                     </Text>
                   </View>
                 </TouchableOpacity>
-                </React.Fragment>
               );
-            })}
+            })()}
+
+            {/* Center Home Button */}
+            <TouchableOpacity
+              style={styles.homeButton}
+              onPress={handleHomePress}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="home" size={24} color="#0A0A0F" />
+            </TouchableOpacity>
+
+            {/* Tab 1: Leaderboard */}
+            {tabs[1] && (() => {
+              const tab = tabs[1];
+              const isActive = activeTabIndex === 1;
+              return (
+                <TouchableOpacity
+                  key={tab.name}
+                  style={styles.tab}
+                  onPress={() => handleTabPress(tab.route, tab.label)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.tabContent}>
+                    <IconSymbol
+                      android_material_icon_name={tab.icon}
+                      ios_icon_name={tab.icon}
+                      size={24}
+                      color={isActive ? theme.colors.primary : (theme.dark ? '#98989D' : '#000000')}
+                    />
+                    <Text
+                      style={[
+                        styles.tabLabel,
+                        { color: theme.dark ? '#98989D' : '#8E8E93' },
+                        isActive && { color: theme.colors.primary, fontWeight: '600' },
+                      ]}
+                    >
+                      {tab.label}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })()}
           </View>
         </BlurView>
       </View>
@@ -237,8 +288,18 @@ const styles = StyleSheet.create({
     left: 2,
     bottom: 4,
     borderRadius: 27,
-    width: `${(100 / 2) - 1}%`, // Default for 2 tabs, will be overridden by dynamic styles
-    // Dynamic styling applied in component
+    // Width overridden by dynamic styles
+  },
+  homeButton: {
+    width: HOME_BUTTON_SIZE,
+    height: HOME_BUTTON_SIZE,
+    borderRadius: HOME_BUTTON_SIZE / 2,
+    backgroundColor: '#A8E63D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -10,
+    // Ensure it sits above the pill visually
+    zIndex: 10,
   },
   tabsContainer: {
     flexDirection: 'row',
