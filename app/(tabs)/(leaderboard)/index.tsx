@@ -7,6 +7,7 @@ import {
   Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { getLeaderboard } from '@/lib/api';
 import { useGame } from '@/contexts/GameContext';
 import type { LeaderboardEntry } from '@/types/game';
@@ -138,6 +139,7 @@ function AnimatedRow({ entry, index, isCurrentUser }: { entry: LeaderboardEntry;
 
 export default function LeaderboardScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { userId } = useGame();
 
   const [loading, setLoading] = useState(true);
@@ -248,9 +250,31 @@ export default function LeaderboardScreen() {
               isCurrentUser={!!(userId && item.rank === userRank)}
             />
           )}
-          contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            <View style={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 8 }}>
+              <Pressable
+                onPress={() => {
+                  console.log('[LeaderboardScreen] Back to Menu pressed');
+                  router.push('/menu');
+                }}
+                style={({ pressed }) => ({
+                  backgroundColor: '#A8E63D',
+                  borderRadius: 12,
+                  height: 52,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.85 : 1,
+                })}
+              >
+                <Text style={{ color: '#0A0A0F', fontFamily: 'SpaceMono', fontSize: 15, fontWeight: '700' }}>
+                  Back to Menu
+                </Text>
+              </Pressable>
+            </View>
+          }
         />
       )}
     </View>

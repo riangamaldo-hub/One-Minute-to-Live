@@ -93,6 +93,12 @@ export default function OutcomeScreen() {
     router.push('/(tabs)/(leaderboard)');
   };
 
+  const handleNextGame = () => {
+    console.log('[OutcomeScreen] Next Game pressed, navigating to play screen');
+    router.dismiss();
+    router.push('/(tabs)/(play)');
+  };
+
   const handleClose = () => {
     console.log('[OutcomeScreen] Close pressed');
     router.dismiss();
@@ -251,6 +257,20 @@ export default function OutcomeScreen() {
           })}
         >
           <Text style={{ color: COLORS.text, fontSize: 16, fontWeight: '700' }}>See Leaderboard</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={handleNextGame}
+          style={({ pressed }) => ({
+            backgroundColor: '#A8E63D',
+            borderRadius: 12,
+            height: 52,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.85 : 1,
+          })}
+        >
+          <Text style={{ color: '#0A0A0F', fontFamily: 'SpaceMono', fontSize: 15, fontWeight: '700' }}>Next Game</Text>
         </Pressable>
       </Animated.View>
     </ScrollView>
