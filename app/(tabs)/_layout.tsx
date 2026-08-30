@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
 
 const TABS: TabBarItem[] = [
   {
@@ -20,6 +21,8 @@ const TABS: TabBarItem[] = [
 ];
 
 export default function TabLayout() {
+  useSubscriptionGuard();
+
   const insets = useSafeAreaInsets();
 
   return (

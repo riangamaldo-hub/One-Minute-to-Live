@@ -1,7 +1,7 @@
 import "react-native-reanimated";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -16,6 +16,8 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { GameProvider } from "@/contexts/GameContext";
+import { SubscriptionProvider, useSubscription } from "@/contexts/SubscriptionContext";
+import { useGame } from "@/contexts/GameContext";
 
 const DevErrorBoundary = __DEV__
   ? ErrorBoundary
@@ -26,6 +28,28 @@ SplashScreen.preventAutoHideAsync();
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
+
+
+function SubscriptionRedirect() {
+  const { isSubscribed, loading } = useSubscription();
+  const { onboardingComplete, isLoading: gameLoading } = useGame();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (loading || gameLoading) return;
+    const onOnboarding = pathname.startsWith("/onboarding");
+    if (onOnboarding) return;
+    if (!onboardingComplete) return;
+    const onPaywall = pathname === "/paywall";
+    if (onPaywall) return;
+    if (!isSubscribed) {
+      router.replace("/paywall");
+    }
+  }, [isSubscribed, loading, gameLoading, onboardingComplete, pathname]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -65,7 +89,9 @@ export default function RootLayout() {
   };
 
   return (
-    <DevErrorBoundary>
+    <SubscriptionProvider>
+          <SubscriptionRedirect />
+  <DevErrorBoundary>
       <StatusBar style="light" animated />
       <ThemeProvider value={colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme}>
         <SafeAreaProvider>
@@ -99,5 +125,6 @@ export default function RootLayout() {
         </SafeAreaProvider>
       </ThemeProvider>
     </DevErrorBoundary>
+    </SubscriptionProvider>
   );
 }

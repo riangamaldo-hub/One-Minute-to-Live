@@ -6,12 +6,14 @@ import {
   Pressable,
   Animated,
   Platform,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { getTodayScenario, submitPlay } from '@/lib/api';
 import { useGame } from '@/contexts/GameContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import type { ScenarioItem, TodayScenarioResponse } from '@/types/game';
 
 const COLORS = {
@@ -30,6 +32,8 @@ const COLORS = {
   successMuted: 'rgba(34, 197, 94, 0.12)',
   border: 'rgba(255, 255, 255, 0.06)',
   divider: 'rgba(255, 255, 255, 0.04)',
+  lime: '#A8E63D',
+  limeMuted: 'rgba(168, 230, 61, 0.12)',
 };
 
 function SkeletonLine({ width, height = 14 }: { width: number | `${number}%`; height?: number }) {
@@ -168,6 +172,7 @@ export default function PlayScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { userId, setLastPlayedDate, onboardingComplete, isLoading: gameLoading } = useGame();
+  const { isSubscribed } = useSubscription();
 
   // Redirect to onboarding if not complete
   useEffect(() => {
@@ -433,6 +438,76 @@ export default function PlayScreen() {
           </Text>
           <Text style={{ color: COLORS.textTertiary, fontSize: 12, marginTop: 4 }}>Come back tomorrow!</Text>
         </View>
+
+        {/* Retry button — pro gated */}
+        {isSubscribed ? (
+          <Pressable
+            onPress={() => {
+              console.log('[PlayScreen] Pro retry pressed');
+              if (Platform.OS === 'ios') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              // Reset state for a fresh attempt
+              setSelectedItems([]);
+              setTimeLeft(scenarioData?.scenario.timer_seconds ?? 60);
+              setGameStarted(false);
+              setSubmitting(false);
+              setScenarioData(prev => prev ? { ...prev, already_played: false, user_result: null } : prev);
+            }}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? 'rgba(168,230,61,0.18)' : COLORS.limeMuted,
+              borderRadius: 14,
+              paddingVertical: 16,
+              alignItems: 'center',
+              borderWidth: 1.5,
+              borderColor: COLORS.lime,
+              marginBottom: 12,
+            })}
+          >
+            <Text style={{ color: COLORS.lime, fontSize: 16, fontWeight: '800', letterSpacing: 0.3 }}>
+              ⚡ Retry — Pro Perk
+            </Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={() => {
+              console.log('[PlayScreen] Free retry prompt pressed — showing upgrade prompt');
+              if (Platform.OS === 'ios') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              Alert.alert(
+                '⚡ Extra Retries',
+                'Pro subscribers get unlimited retries. Upgrade to keep surviving!',
+                [
+                  { text: 'Maybe Later', style: 'cancel' },
+                  {
+                    text: 'Upgrade to Pro',
+                    onPress: () => {
+                      console.log('[PlayScreen] Upgrade to Pro pressed from retry prompt');
+                      router.push('/paywall');
+                    },
+                  },
+                ]
+              );
+            }}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? COLORS.surfaceElevated : COLORS.surfaceSecondary,
+              borderRadius: 14,
+              paddingVertical: 16,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+              marginBottom: 12,
+            })}
+          >
+            <Text style={{ color: COLORS.textSecondary, fontSize: 16, fontWeight: '700' }}>
+              🔒 Retry (Pro Only)
+            </Text>
+            <Text style={{ color: COLORS.textTertiary, fontSize: 12, marginTop: 3 }}>
+              Upgrade to unlock extra retries
+            </Text>
+          </Pressable>
+        )}
 
         <Pressable
           onPress={() => {

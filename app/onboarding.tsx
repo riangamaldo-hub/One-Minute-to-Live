@@ -95,7 +95,7 @@ export default function OnboardingScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     await setOnboardingComplete();
-    router.replace('/(tabs)/(play)');
+    router.replace('/paywall');
   };
 
   const isLast = currentSlide === SLIDES.length - 1;
