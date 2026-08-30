@@ -90,12 +90,12 @@ export default function RootLayout() {
 
   return (
     <SubscriptionProvider>
-          <SubscriptionRedirect />
   <DevErrorBoundary>
       <StatusBar style="light" animated />
       <ThemeProvider value={colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme}>
         <SafeAreaProvider>
           <GameProvider>
+            <SubscriptionRedirect />
             <GestureHandlerRootView style={{ flex: 1 }}>
               <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A0A0F" } }}>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
